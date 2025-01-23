@@ -4,6 +4,7 @@ use dir_watcher::{watcher, UploadFn};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
+mod clipboard;
 mod config;
 mod dir_watcher;
 mod uploader;

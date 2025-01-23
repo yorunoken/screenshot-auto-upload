@@ -1,4 +1,5 @@
-use clipboard::{ClipboardContext, ClipboardProvider};
+use crate::clipboard::set_clipboard_content;
+
 use notify::event::{AccessKind, AccessMode, EventKind};
 use notify::{recommended_watcher, Event, RecursiveMode, Result as NotifyResult, Watcher};
 
@@ -14,7 +15,6 @@ pub type UploadFn = Box<
 >;
 
 pub async fn watcher(screenshot_path: &Path, upload_fn: UploadFn) -> Result<(), Box<dyn Error>> {
-    let mut c_context: ClipboardContext = ClipboardProvider::new()?;
     let (tx, rx) = mpsc::channel::<NotifyResult<Event>>();
 
     let mut watcher = recommended_watcher(tx)?;
@@ -35,7 +35,7 @@ pub async fn watcher(screenshot_path: &Path, upload_fn: UploadFn) -> Result<(), 
                             match upload_fn(file_path).await {
                                 Ok(file_url) => {
                                     println!("Successfully uploaded: {}", file_path);
-                                    c_context.set_contents(String::from(file_url))?;
+                                    set_clipboard_content(&file_url)?;
                                 }
                                 Err(err) => eprintln!("Failed to upload {}: {}", file_path, err),
                             }
