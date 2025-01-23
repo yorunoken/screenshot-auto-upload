@@ -1,7 +1,6 @@
 use clap::{Parser, ValueEnum};
 use config::Config;
 use dir_watcher::{watcher, UploadFn};
-use dotenvy::dotenv;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
@@ -43,10 +42,6 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
-    if let Err(err) = dotenv() {
-        eprintln!("Failed to load .env file: {}", err);
-    }
-
     let args = Args::parse();
     let (provider, key, screenshot_path) = if let Ok(config) = Config::load(&args.config_path) {
         (

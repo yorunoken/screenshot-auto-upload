@@ -1,9 +1,8 @@
+use clipboard::{ClipboardContext, ClipboardProvider};
 use notify::event::{AccessKind, AccessMode, EventKind};
 use notify::{recommended_watcher, Event, RecursiveMode, Result as NotifyResult, Watcher};
 
-use std::future::Future;
-use std::pin::Pin;
-use std::{error::Error, path::Path, sync::mpsc};
+use std::{error::Error, future::Future, path::Path, pin::Pin, sync::mpsc};
 
 pub type UploadFn = Box<
     dyn for<'a> Fn(
@@ -15,6 +14,7 @@ pub type UploadFn = Box<
 >;
 
 pub async fn watcher(screenshot_path: &Path, upload_fn: UploadFn) -> Result<(), Box<dyn Error>> {
+    let mut c_context: ClipboardContext = ClipboardProvider::new()?;
     let (tx, rx) = mpsc::channel::<NotifyResult<Event>>();
 
     let mut watcher = recommended_watcher(tx)?;
@@ -33,7 +33,10 @@ pub async fn watcher(screenshot_path: &Path, upload_fn: UploadFn) -> Result<(), 
                             println!("Processing file: {}", file_path);
 
                             match upload_fn(file_path).await {
-                                Ok(_) => println!("Successfully uploaded: {}", file_path),
+                                Ok(file_url) => {
+                                    println!("Successfully uploaded: {}", file_path);
+                                    c_context.set_contents(String::from(file_url))?;
+                                }
                                 Err(err) => eprintln!("Failed to upload {}: {}", file_path, err),
                             }
                         }
