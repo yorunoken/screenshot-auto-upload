@@ -1,0 +1,2 @@
+# screenshot-auto-upload
+ 
